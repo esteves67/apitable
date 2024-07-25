@@ -95,12 +95,14 @@ function getFileFormat(options?: IImageThumbOption) {
   return '';
 }
 
+// Fix Duplicated Url Attachments GridView - #1738 Issue
 function getImageThumbSrcForQiniu(src: string, options: IImageThumbOption) {
-  if (!/^http/.test(src)) {
-    src[0] !== '/' && (src = '/' + src);
+  // Ensure src is a properly formed URL before processing
+  if (!/^http?:\/\//.test(src)) {
+    src = integrateCdnHost(src);
   }
 
-  if(src.includes('?')){
+  if (src.includes('?')) {
     return [
       src,
       '&imageView2',
@@ -120,6 +122,7 @@ function getImageThumbSrcForQiniu(src: string, options: IImageThumbOption) {
     getFileQuality(options),
   ].join('');
 }
+// Fix Duplicated Url Attachments GridView - #1738 Issue
 
 export function getImageThumbSrc(src: string, options?: IImageThumbOption) {
   if (!options || getCustomConfig()?.DISABLED_QINIU_COMPRESSION_PARAMS) {
@@ -202,19 +205,19 @@ export function cellValueToImageSrc(
   return defaultSrc;
 }
 
-export const integrateCdnHost = (
-  pathName: string,
-): string => {
+// Fix Duplicated Url Attachments GridView - #1738 Issue
+export const integrateCdnHost = (pathName: string): string => {
   if (!pathName) {
     return pathName;
   }
-  // TODO: delete this. Compatible with old version data
-  if (pathName.startsWith('http')) {
+  // Compatible with old version data
+  if (/^http?:\/\//.test(pathName)) {
     return pathName;
   }
   const host: string = getHostOfAttachment('QNY1', pathName);
   return urlcat(host, pathName);
 };
+// Fix Duplicated Url Attachments GridView - #1738 Issue
 
 function startsWithIgnoreSlashPre(str: string, prefix: string): boolean {
   if (str.startsWith(prefix)) {
